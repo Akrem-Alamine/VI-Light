@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "368015209080",
+    "firebase_url": "https://varietesinuds-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "varietesinuds",
+    "storage_bucket": "varietesinuds.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368015209080:android:7ffac2bf5989398aa9b38d",
+        "android_client_info": {
+          "package_name": "com.example.vi_light"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCho5UxehCKNKismhYfctB8EQRnuRZtQ8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368015209080:android:09fe6c194ead583fa9b38d",
+        "android_client_info": {
+          "package_name": "com.vilight.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCho5UxehCKNKismhYfctB8EQRnuRZtQ8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
