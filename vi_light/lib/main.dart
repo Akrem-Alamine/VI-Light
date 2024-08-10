@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:vi_light/websocket_view.dart';
 import 'firebase_options.dart';
 enum MenuAction{reset,disconnectWifi}
 void main() async{
@@ -13,7 +14,7 @@ void main() async{
       debugShowCheckedModeBanner: false,
       title: 'VI Lights',
       theme: ThemeData.dark(),
-      home: const HomePage(),
+      home: new WebSocketView(),
     ),);
 }
 
