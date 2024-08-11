@@ -11,6 +11,9 @@ dependencies:
   cupertino_icons: ^1.0.6
   web_socket_channel: ^3.0.1
   auto_route: ^9.1.0
+  path_provider: ^2.1.4
+  sunrise_sunset_calc: ^3.0.0
+  sliding_up_panel: ^2.0.0+1
 
 dev_dependencies:
   flutter_test:

@@ -28,7 +28,13 @@ class _MainwrapperState extends State<Mainwrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10),
+          ),
+        ),
         title: const Text("VI Lights"),
         actions: <Widget>[
           IconButton(
@@ -42,6 +48,7 @@ class _MainwrapperState extends State<Mainwrapper> {
         ],
       ),
       body: SafeArea(
+        
         top: false,
         child: IndexedStack(
           index: _selectedIndex,
@@ -52,6 +59,7 @@ class _MainwrapperState extends State<Mainwrapper> {
         ),
       ),
       bottomNavigationBar: NavigationBar(
+              backgroundColor: Color.fromARGB(10, 0, 48, 143),
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
           _onItemTapped;
