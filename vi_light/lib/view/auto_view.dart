@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
+import 'package:vi_light/service/web_socket_service.dart';
 
 class AutoView extends StatefulWidget {
   const AutoView({super.key});
@@ -9,23 +10,59 @@ class AutoView extends StatefulWidget {
 }
 
 class _AutoViewState extends State<AutoView> {
+  bool light = false;
+  late WebSocketService webSocketService;
+  Timer? _statusTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    webSocketService = WebSocketService('ws://192.168.100.83:81');
+    _listenToWebSocket();
+    _startStatusTimer();
+  }
+
+  void _listenToWebSocket() {
+    webSocketService.messages.listen((message) {
+      setState(() {
+        light = message.contains("lightON");
+        print(message);
+      });
+    }, onError: (error) {
+      print('Error listening to WebSocket: $error');
+    });
+  }
+
+  void _startStatusTimer() {
+    _statusTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
+      _sendStatusRequest();
+    });
+  }
+
+  Future<void> _sendStatusRequest() async {
+    try {
+      await webSocketService.sendMessage("AutoMode");
+    } catch (error) {
+      print('Error sending status request: $error');
+    }
+  }
+
+  @override
+  void dispose() {
+    _statusTimer?.cancel(); // Cancel the timer when disposing
+    webSocketService.dispose(); // Close the WebSocket connection when disposing
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    String sunriseSunset = getSunriseSunset(
-            36.75869, 10.2042388, Duration(hours: 1), DateTime.now())
-        .toString();
-    var sunrise = DateTime.parse(
-        '${DateTime.now().toString().substring(0, 10)} ${sunriseSunset.substring(20, 28)}');
-    var sunset = DateTime.parse(
-        '${DateTime.now().toString().substring(0, 10)} ${sunriseSunset.substring(54, 62)}');
-    var timeNow =
-        DateTime.parse('${DateTime.now().toString().substring(0, 19)}');
-    bool on = timeNow.isBefore(sunrise) || sunset.isBefore(timeNow);
     return Scaffold(
       backgroundColor: Colors.white,
-        body: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            on
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            light
                 ? const Icon(
                     Icons.lightbulb,
                     size: 170,
@@ -36,27 +73,7 @@ class _AutoViewState extends State<AutoView> {
                     size: 170,
                     color: Color.fromARGB(255, 0, 48, 143),
                   ),
-          ]),
-        ),
-    );
-  }
-}
-
-class BarIndicator extends StatelessWidget {
-  const BarIndicator({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(20),
-      child: Container(
-        width: 40,
-        height: 3,
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 0, 48, 143),
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+          ],
         ),
       ),
     );

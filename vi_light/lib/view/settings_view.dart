@@ -14,7 +14,7 @@ class _SettingRouteState extends State<SettingRoute> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, //change your color here
         ),
         title: const Text('Settings'),
@@ -30,16 +30,16 @@ class _SettingRouteState extends State<SettingRoute> {
               child:Column(
                 children: <Widget>[
                   ListTile(
-                    leading: Icon(Icons.portable_wifi_off, color: Color.fromARGB(255, 0, 48, 143),),
-                    title: Text("Disconnect"),
+                    leading: const Icon(Icons.portable_wifi_off, color: Color.fromARGB(255, 0, 48, 143),),
+                    title: const Text("Disconnect"),
                     onTap: () {
 
                     },
                   
                   ),
                    ListTile(
-                    leading: Icon(Icons.restart_alt, color: Color.fromARGB(255, 0, 48, 143),),
-                    title: Text("Reset"),
+                    leading: const Icon(Icons.restart_alt, color: Color.fromARGB(255, 0, 48, 143),),
+                    title: const Text("Reset"),
                     onTap: () {
                       
                     },
