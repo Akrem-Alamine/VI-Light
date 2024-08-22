@@ -63,9 +63,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     } else if (message == "LightOn" && manualMode) {
       lightState = true;  // Turn on light in manual mode
       webSocket.sendTXT(num, "Light Turned On");
+      digitalWrite(HIGH);
     } else if (message == "LightOff" && manualMode) {
       lightState = false;  // Turn off light in manual mode
       webSocket.sendTXT(num, "Light Turned Off");
+      digitalWrite(LOW);
     }
   }
 }
@@ -76,6 +78,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
 // Handle automatic mode based on the time of day and solar calculations
 void handleModeAuto(String message, uint8_t num) {
+  int t1 = millis();
+  int timePassed = 0;
   int year = message.substring(9, 13).toInt();
   int month = message.substring(14, 16).toInt();
   int day = message.substring(17, 19).toInt();
@@ -99,12 +103,17 @@ void handleModeAuto(String message, uint8_t num) {
   int sunriseMinute = (int)(sunriseTime) % 60;
   int sunsetHour = (int)(sunsetTime / 60) % 24;
   int sunsetMinute = (int)(sunsetTime) % 60;
-
+  timePassed =timePassed + millis() - t1;
   // Determine if it's time to turn lights on or off
-  bool lightAuto = ((hour * 60 + minute) > (sunsetHour * 60 + sunsetMinute)) || 
-                   ((hour * 60 + minute) < (sunriseHour * 60 + sunriseMinute));
+  bool lightAuto = ((hour * 60 + minute)+(timePassed/60000) > (sunsetHour * 60 + sunsetMinute)) || 
+                   ((hour * 60 + minute)+(timePassed/60000) < (sunriseHour * 60 + sunriseMinute));
   webSocket.sendTXT(num, lightAuto ? "lightON" : "lightOFF");
-  Serial.print("Auto Mode is Active...");
+  if(lightAuto){
+    digitalWrite(HIGH);
+  }
+  else{
+    digitalWrite(LOW);
+  }
 
 }
 
