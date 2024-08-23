@@ -3,6 +3,11 @@
 #include <WebSocketsServer.h>
 #include <WiFiManager.h>
 #include "SunsetSunrise.h"
+#include <ThreeWire.h>  
+#include <RtcDS1302.h>
+
+ThreeWire myWire(D4,D5,D3); // IO, SCLK, CE
+RtcDS1302<ThreeWire> Rtc(myWire);
 
 // WiFi and Server Setup
 WiFiManager wm;
@@ -19,6 +24,7 @@ bool lightState = false;  // Light is off initially
 double latitude = 36.8065;   // Tunis latitude
 double longitude = 10.1815;  // Tunis longitude
 int timezone = 1;            // UTC+1 for Tunis
+
 
 // =========================================================
 //                      Web Server Handlers
@@ -44,7 +50,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   if (type == WStype_TEXT) {  // If the WebSocket event is a text message
     String message = String((char *)payload);
     Serial.println(message);
-
     // Handle automatic mode based on the sunrise and sunset times
     if (message == "ping") {
       // Respond with pong, current mode, and light status
@@ -54,7 +59,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
       manualMode = false;
       autoMode = true;
       lightState = false;
-      handleModeAuto(message, num);
+      handleModeAuto(num);
     }
     else if (message == "ManualMode") {
       manualMode = true;
@@ -63,11 +68,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     } else if (message == "LightOn" && manualMode) {
       lightState = true;  // Turn on light in manual mode
       webSocket.sendTXT(num, "Light Turned On");
-      digitalWrite(HIGH);
+      //digitalWrite(HIGH);
     } else if (message == "LightOff" && manualMode) {
       lightState = false;  // Turn off light in manual mode
       webSocket.sendTXT(num, "Light Turned Off");
-      digitalWrite(LOW);
+      //digitalWrite(LOW);
     }
   }
 }
@@ -77,14 +82,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 // =========================================================
 
 // Handle automatic mode based on the time of day and solar calculations
-void handleModeAuto(String message, uint8_t num) {
-  int t1 = millis();
-  int timePassed = 0;
-  int year = message.substring(9, 13).toInt();
-  int month = message.substring(14, 16).toInt();
-  int day = message.substring(17, 19).toInt();
-  int hour = message.substring(20, 22).toInt();
-  int minute = message.substring(23, 25).toInt();
+void handleModeAuto(uint8_t num) {
+  RtcDateTime now = Rtc.GetDateTime();
+  int year = now.Year();
+  int month = now.Month();
+  int day = now.Day();
 
   // Calculate Julian Day and solar declination
   int JD = julianDay(year, month, day);
@@ -103,18 +105,17 @@ void handleModeAuto(String message, uint8_t num) {
   int sunriseMinute = (int)(sunriseTime) % 60;
   int sunsetHour = (int)(sunsetTime / 60) % 24;
   int sunsetMinute = (int)(sunsetTime) % 60;
-  timePassed =timePassed + millis() - t1;
+  int currentMinutes= now.Hour()*60+now.Minute();
   // Determine if it's time to turn lights on or off
-  bool lightAuto = ((hour * 60 + minute)+(timePassed/60000) > (sunsetHour * 60 + sunsetMinute)) || 
-                   ((hour * 60 + minute)+(timePassed/60000) < (sunriseHour * 60 + sunriseMinute));
+  bool lightAuto = (currentMinutes > (sunsetHour * 60 + sunsetMinute)) || 
+                   (currentMinutes < (sunriseHour * 60 + sunriseMinute));
   webSocket.sendTXT(num, lightAuto ? "lightON" : "lightOFF");
   if(lightAuto){
-    digitalWrite(HIGH);
+    //digitalWrite(HIGH);
   }
   else{
-    digitalWrite(LOW);
+    //digitalWrite(LOW);
   }
-
 }
 
 // =========================================================
@@ -136,7 +137,8 @@ void webSocketConnection() {
 
 void setup() {
   Serial.begin(115200);
-
+  Rtc.Begin();
+  RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
   // Attempt to connect to Wi-Fi
   wmResult = wm.autoConnect("VI Light WiFi Manager");
 
@@ -164,6 +166,7 @@ void loop() {
   server.handleClient();
   webSocket.loop();
 }
+
 String getMode() {
   if (manualMode) {
     return "Manual";

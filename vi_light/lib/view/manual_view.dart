@@ -15,13 +15,7 @@ class _ManualViewState extends State<ManualView> {
   @override
   void initState() {
     super.initState();
-    // Initialize WebSocket service and connect
     webSocketService = WebSocketService('ws://192.168.100.83:81');
-    
-    // Send initial message to get the status of the light
-    
-    
-    // Listen to WebSocket messages
   }
 
   @override
@@ -49,9 +43,15 @@ class _ManualViewState extends State<ManualView> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
-                setState(() {
+                setState((){
                   light = !light;
                 });
+                if (light){
+                    webSocketService.sendMessage('LightOn');
+                  }
+                else{
+                    webSocketService.sendMessage('LightOff');
+                }
               },
               child: Text(light ? 'Led Off' : 'Led On'),
             ),

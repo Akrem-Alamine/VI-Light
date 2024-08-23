@@ -47,7 +47,7 @@ class _MainWrapperState extends State<MainWrapper> {
     String message;
     switch (_selectedIndex) {
       case 1:  // Auto Mode
-        message = "AutoMode ${DateTime.now()}";
+        message = "AutoMode";
         break;
       case 0:  // Manual Mode
         message = "ManualMode";

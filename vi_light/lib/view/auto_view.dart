@@ -1,6 +1,5 @@
-import 'dart:async';
+import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
 import 'package:flutter/material.dart';
-import 'package:vi_light/service/web_socket_service.dart';
 
 class AutoView extends StatefulWidget {
   const AutoView({super.key});
@@ -10,47 +9,18 @@ class AutoView extends StatefulWidget {
 }
 
 class _AutoViewState extends State<AutoView> {
-  bool light = false;
-  late WebSocketService webSocketService;
-  Timer? _statusTimer;
+  late SunriseSunsetResult sunriseSunset;
+  late bool light;
 
   @override
   void initState() {
     super.initState();
-    webSocketService = WebSocketService('ws://192.168.100.83:81');
-    _listenToWebSocket();
-    _startStatusTimer();
-  }
-
-  void _listenToWebSocket() {
-    webSocketService.messages.listen((message) {
-      setState(() {
-        light = message.contains("lightON");
-        print(message);
-      });
-    }, onError: (error) {
-      print('Error listening to WebSocket: $error');
-    });
-  }
-
-  void _startStatusTimer() {
-    _statusTimer = Timer.periodic(Duration(seconds: 2), (Timer timer) {
-      _sendStatusRequest();
-    });
-  }
-
-  Future<void> _sendStatusRequest() async {
-    try {
-      await webSocketService.sendMessage("AutoMode");
-    } catch (error) {
-      print('Error sending status request: $error');
-    }
+    sunriseSunset = getSunriseSunset(36.8065, 10.1815, Duration(hours: 1), DateTime.now());
+    light = DateTime.now().isBefore(DateTime.parse(sunriseSunset.sunrise.toString())) || DateTime.now().isAfter(DateTime.parse(sunriseSunset.sunset.toString())) ;
   }
 
   @override
   void dispose() {
-    _statusTimer?.cancel(); // Cancel the timer when disposing
-    webSocketService.dispose(); // Close the WebSocket connection when disposing
     super.dispose();
   }
 
