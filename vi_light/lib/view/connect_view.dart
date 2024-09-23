@@ -12,6 +12,8 @@ class ConnectView extends StatefulWidget {
 
 class _ConnectViewState extends State<ConnectView> {
   bool _isConnecting = false;
+  final TextEditingController _ipController = TextEditingController();
+  String _ipAddress = '';
 
   void _connect() async {
     setState(() {
@@ -28,7 +30,7 @@ class _ConnectViewState extends State<ConnectView> {
       }
     });
 
-    const serverUrl = 'ws://192.168.100.83:81';
+    final serverUrl = 'ws://$_ipAddress:81';
     final webSocketService = WebSocketService(serverUrl);
 
     try {
@@ -75,7 +77,7 @@ class _ConnectViewState extends State<ConnectView> {
         return AlertDialog(
           title: const Text('Connection Failed'),
           content: const Text(
-              'Unable to connect to the WebSocket server. Please try again later.'),
+              'Unable to connect to the WebSocket server. Please check the IP address and try again.'),
           actions: [
             TextButton(
               onPressed: () {
@@ -112,6 +114,19 @@ class _ConnectViewState extends State<ConnectView> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
+              // IP Address Input Field
+              TextField(
+                controller: _ipController,
+                decoration: const InputDecoration(
+                  labelText: 'Enter ESP IP Address',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _ipAddress = value;
+                },
+              ),
+              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _isConnecting ? null : _connect,
                 style: ElevatedButton.styleFrom(
@@ -142,5 +157,11 @@ class _ConnectViewState extends State<ConnectView> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _ipController.dispose();
+    super.dispose();
   }
 }
